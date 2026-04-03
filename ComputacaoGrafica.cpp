@@ -111,7 +111,6 @@ void keyboard_special(int key, int x, int y) {
 	switch (key) {
 	case GLUT_KEY_DOWN:
 		movimentar(cubo, 0.1);
-		std::cout << "pra cima";
 		break;
 
 	case GLUT_KEY_UP:
