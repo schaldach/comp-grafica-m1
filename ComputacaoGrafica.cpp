@@ -110,19 +110,20 @@ void keyboard_special(int key, int x, int y) {
 	std::cout << key;
 	switch (key) {
 	case GLUT_KEY_DOWN:
-		movimentar(cubo, 10);
+		movimentar(cubo, 0.1);
+		std::cout << "pra cima";
 		break;
 
 	case GLUT_KEY_UP:
-		movimentar(cubo, 10);
+		movimentar(cubo, -0.1);
 		break;
 
 	case GLUT_KEY_RIGHT:
-		movimentar(cubo, 10);
+		movimentar(cubo, 0.1);
 		break;
 
 	case GLUT_KEY_LEFT:
-		movimentar(cubo, 10);
+		movimentar(cubo, 0.1);
 		break;
 
 	}
@@ -146,71 +147,74 @@ Cubo criar_cubo(double posicao_x, double posicao_y, double posicao_z, double tam
 	novo_cubo.rotacao = 0;
 
 	double posicao_x_v, posicao_y_v, posicao_z_v;
-		
-	posicao_x_v = posicao_x + tamanho_raio ;
-	posicao_y_v = posicao_y + tamanho_raio ;
-	posicao_z_v = posicao_z + tamanho_raio ;
+
+	posicao_x_v = posicao_x + tamanho_raio;
+	posicao_y_v = posicao_y + tamanho_raio;
+	posicao_z_v = posicao_z + tamanho_raio;
 	novo_cubo.vertices.push_back(vertice(posicao_x_v, posicao_y_v, posicao_z_v));
 
-	posicao_x_v = posicao_x - tamanho_raio ;
-	posicao_y_v = posicao_y + tamanho_raio ;
-	posicao_z_v = posicao_z + tamanho_raio ;
+	posicao_x_v = posicao_x - tamanho_raio;
+	posicao_y_v = posicao_y + tamanho_raio;
+	posicao_z_v = posicao_z + tamanho_raio;
 	novo_cubo.vertices.push_back(vertice(posicao_x_v, posicao_y_v, posicao_z_v));
 
-	posicao_x_v = posicao_x - tamanho_raio ;
-	posicao_y_v = posicao_y + tamanho_raio ;
-	posicao_z_v = posicao_z - tamanho_raio ;
+	posicao_x_v = posicao_x - tamanho_raio;
+	posicao_y_v = posicao_y + tamanho_raio;
+	posicao_z_v = posicao_z - tamanho_raio;
 	novo_cubo.vertices.push_back(vertice(posicao_x_v, posicao_y_v, posicao_z_v));
 
-	posicao_x_v = posicao_x + tamanho_raio ;
-	posicao_y_v = posicao_y + tamanho_raio ;
-	posicao_z_v = posicao_z - tamanho_raio ;
+	posicao_x_v = posicao_x + tamanho_raio;
+	posicao_y_v = posicao_y + tamanho_raio;
+	posicao_z_v = posicao_z - tamanho_raio;
 	novo_cubo.vertices.push_back(vertice(posicao_x_v, posicao_y_v, posicao_z_v));
 
-	posicao_x_v = posicao_x + tamanho_raio ;
-	posicao_y_v = posicao_y - tamanho_raio ;
-	posicao_z_v = posicao_z + tamanho_raio ;
+	posicao_x_v = posicao_x + tamanho_raio;
+	posicao_y_v = posicao_y - tamanho_raio;
+	posicao_z_v = posicao_z + tamanho_raio;
 	novo_cubo.vertices.push_back(vertice(posicao_x_v, posicao_y_v, posicao_z_v));
 
-	posicao_x_v = posicao_x - tamanho_raio ;
-	posicao_y_v = posicao_y - tamanho_raio ;
-	posicao_z_v = posicao_z + tamanho_raio ;
+	posicao_x_v = posicao_x - tamanho_raio;
+	posicao_y_v = posicao_y - tamanho_raio;
+	posicao_z_v = posicao_z + tamanho_raio;
 	novo_cubo.vertices.push_back(vertice(posicao_x_v, posicao_y_v, posicao_z_v));
 
-	posicao_x_v = posicao_x - tamanho_raio ;
-	posicao_y_v = posicao_y - tamanho_raio ;
-	posicao_z_v = posicao_z - tamanho_raio ;
+	posicao_x_v = posicao_x - tamanho_raio;
+	posicao_y_v = posicao_y - tamanho_raio;
+	posicao_z_v = posicao_z - tamanho_raio;
 	novo_cubo.vertices.push_back(vertice(posicao_x_v, posicao_y_v, posicao_z_v));
 
-	posicao_x_v = posicao_x + tamanho_raio ;
-	posicao_y_v = posicao_y - tamanho_raio ;
-	posicao_z_v = posicao_z - tamanho_raio ;
+	posicao_x_v = posicao_x + tamanho_raio;
+	posicao_y_v = posicao_y - tamanho_raio;
+	posicao_z_v = posicao_z - tamanho_raio;
 	novo_cubo.vertices.push_back(vertice(posicao_x_v, posicao_y_v, posicao_z_v));
 
 	for (int i = 0; i < 4; i++) {
-		novo_cubo.arestas.push_back(aresta(i, (i+1)%4));
+		novo_cubo.arestas.push_back(aresta(i, (i + 1) % 4));
 	}
 	for (int i = 0; i < 4; i++) {
 		novo_cubo.arestas.push_back(aresta(i + 4, ((i + 1) % 4) + 4));
 	}
 	for (int i = 0; i < 4; i++) {
-		novo_cubo.arestas.push_back(aresta(i, i+4));
+		novo_cubo.arestas.push_back(aresta(i, i + 4));
 	}
 
 	return novo_cubo;
 }
 
 void movimentar(Cubo& poligono, double distancia) {
+	std::cout << std::get<0>(poligono.posicao) << "\n";
+
 	std::get<0>(poligono.posicao) = std::get<0>(poligono.posicao) + distancia;
 	std::get<1>(poligono.posicao) = std::get<1>(poligono.posicao) + distancia;
 	std::get<2>(poligono.posicao) = std::get<2>(poligono.posicao) + distancia;
 
-	for (int i = 0; i < poligono.numLados; i++) {
+	for (int i = 0; i < 8; i++) {
 		std::get<0>(poligono.vertices[i]) = std::get<0>(poligono.vertices[i]) + distancia;
 		std::get<1>(poligono.vertices[i]) = std::get<1>(poligono.vertices[i]) + distancia;
 		std::get<2>(poligono.vertices[i]) = std::get<2>(poligono.vertices[i]) + distancia;
 	}
 
+	std::cout << std::get<0>(poligono.posicao) << "\n";
 }
 
 void escalar(Cubo& poligono, double escala) {
@@ -220,7 +224,7 @@ void escalar(Cubo& poligono, double escala) {
 	std::get<1>(poligono.posicao) = std::get<1>(poligono.posicao);
 	std::get<2>(poligono.posicao) = std::get<2>(poligono.posicao);
 
-	for (int i = 0; i < poligono.numLados; i++) {
+	for (int i = 0; i < 8; i++) {
 		std::get<0>(poligono.vertices[i]) -= std::get<0>(poligono.posicao);
 		std::get<1>(poligono.vertices[i]) -= std::get<1>(poligono.posicao);
 		std::get<2>(poligono.vertices[i]) -= std::get<2>(poligono.posicao);
