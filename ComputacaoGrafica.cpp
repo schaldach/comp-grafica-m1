@@ -2,6 +2,7 @@
 #include <GL/freeglut.h>
 #include <vector>
 #include <tuple>
+#include <math.h>
 using vertice = std::tuple<double, double, double>;
 using lista_vertices = std::vector<vertice>;
 using aresta = std::pair<int, int>;
@@ -97,12 +98,25 @@ void keyboard(unsigned char key, int x, int y) {
 	case 'p':
 		escalar(cubo, 1.1);
 		break;
-	case 'k':
-		velocidadeRotacao -= 0.01;
-		break;
-	case 'l':
-		velocidadeRotacao += 0.01;
-		break;
+
+    case 'w':
+        rotacionar(cubo, -0.1, 0);
+        break;
+    case 's':
+        rotacionar(cubo, 0.1, 0);
+        break;
+    case 'd':
+        rotacionar(cubo, -0.1, 1);
+        break;
+    case 'a':
+        rotacionar(cubo, 0.1, 1);
+        break;
+    case 'e':
+        rotacionar(cubo, -0.1, 2);
+        break;
+    case 'q':
+        rotacionar(cubo, 0.1, 2);
+        break;
 	}
 }
 
@@ -129,8 +143,6 @@ void keyboard_special(int key, int x, int y) {
 }
 
 void redraw(int value) {
-	rotacionar(cubo, velocidadeRotacao, 1);
-
 	glutPostRedisplay();
 	glutTimerFunc(delay, redraw, 0);
 }
@@ -239,8 +251,49 @@ void escalar(Cubo& poligono, double escala) {
 }
 
 void rotacionar(Cubo& poligono, double angulo, int eixo) {
+    double novoX;
+    double novoY;
+    double novoZ;
 
-	poligono.rotacao += angulo;
+    for (int i = 0; i < 8; i++) {
+		std::get<0>(poligono.vertices[i]) -= std::get<0>(poligono.posicao);
+		std::get<1>(poligono.vertices[i]) -= std::get<1>(poligono.posicao);
+		std::get<2>(poligono.vertices[i]) -= std::get<2>(poligono.posicao);
+
+        switch(eixo) {
+        case 0: // x
+            novoY = std::get<1>(poligono.vertices[i]) * cos(angulo) - std::get<2>(poligono.vertices[i]) * sin(angulo);
+            novoZ = std::get<1>(poligono.vertices[i]) * sin(angulo) + std::get<2>(poligono.vertices[i]) * cos(angulo);
+
+            // std::get<0>(poligono.vertices[i]) = std::get<0>(poligono.vertices[i]);
+            std::get<1>(poligono.vertices[i]) = novoY;
+            std::get<2>(poligono.vertices[i]) = novoZ;
+
+            break;
+        case 1: // y
+            novoX = std::get<0>(poligono.vertices[i]) * cos(angulo) - std::get<2>(poligono.vertices[i]) * sin(angulo);
+            novoZ = std::get<0>(poligono.vertices[i]) * sin(angulo) + std::get<2>(poligono.vertices[i]) * cos(angulo);
+
+            std::get<0>(poligono.vertices[i]) = novoX;
+            // std::get<1>(poligono.vertices[i]) = std::get<1>(poligono.vertices[i]);
+            std::get<2>(poligono.vertices[i]) = novoZ;
+
+            break;
+        case 2: // z
+            novoX = std::get<0>(poligono.vertices[i]) * cos(angulo) - std::get<1>(poligono.vertices[i]) * sin(angulo);
+            novoY = std::get<0>(poligono.vertices[i]) * sin(angulo) + std::get<1>(poligono.vertices[i]) * cos(angulo);
+
+            std::get<0>(poligono.vertices[i]) = novoX;
+            std::get<1>(poligono.vertices[i]) = novoY;
+            // std::get<2>(poligono.vertices[i]) = std::get<2>(poligono.vertices[i]);
+
+            break;
+        }
+
+		std::get<0>(poligono.vertices[i]) += std::get<0>(poligono.posicao);
+		std::get<1>(poligono.vertices[i]) += std::get<1>(poligono.posicao);
+		std::get<2>(poligono.vertices[i]) += std::get<2>(poligono.posicao);
+	}
 
 	//for (int i = 0; i < poligono.arestas.size(); i++) {
 	//	poligono.vertices[i].first -= poligono.posicao.first;
