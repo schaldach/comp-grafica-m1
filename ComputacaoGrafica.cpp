@@ -20,14 +20,13 @@ struct Cubo {
 
 Cubo criar_cubo(double posicao_x, double posicao_y, double posicao_z, double tamanho_raio);
 void desenhar(Cubo poligono);
-void movimentar(Cubo& poligono, double distancia);
+void movimentar(Cubo& poligono, double distancia_x, double distancia_y, double distancia_z);
 void escalar(Cubo& poligono, double escala);
 void rotacionar(Cubo& poligono, double angulo, int eixo);
 
 void display();
 void redraw(int value);
 void keyboard(unsigned char key, int x, int y);
-void keyboard_special(int key, int x, int y);
 
 Cubo cubo;
 float velocidadeRotacao = 0;
@@ -65,7 +64,7 @@ int main(int argc, char** argv) {
 
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboard);
-	glutSpecialFunc(keyboard_special);
+	//glutSpecialFunc(keyboard_special);
 	glutTimerFunc(10, redraw, 0);
 	glutReshapeFunc(reshape);
 	initGL();
@@ -99,46 +98,42 @@ void keyboard(unsigned char key, int x, int y) {
 		escalar(cubo, 1.1);
 		break;
 
-    case 'w':
-        rotacionar(cubo, -0.1, 0);
-        break;
-    case 's':
-        rotacionar(cubo, 0.1, 0);
-        break;
-    case 'd':
-        rotacionar(cubo, -0.1, 1);
-        break;
-    case 'a':
-        rotacionar(cubo, 0.1, 1);
-        break;
-    case 'e':
-        rotacionar(cubo, -0.1, 2);
-        break;
-    case 'q':
-        rotacionar(cubo, 0.1, 2);
-        break;
-	}
-}
-
-void keyboard_special(int key, int x, int y) {
-	std::cout << key;
-	switch (key) {
-	case GLUT_KEY_DOWN:
-		movimentar(cubo, 0.1);
+	case 'w':
+		rotacionar(cubo, -0.1, 0);
 		break;
-
-	case GLUT_KEY_UP:
-		movimentar(cubo, -0.1);
+	case 's':
+		rotacionar(cubo, 0.1, 0);
 		break;
-
-	case GLUT_KEY_RIGHT:
-		movimentar(cubo, 0.1);
+	case 'd':
+		rotacionar(cubo, -0.1, 1);
 		break;
-
-	case GLUT_KEY_LEFT:
-		movimentar(cubo, 0.1);
+	case 'a':
+		rotacionar(cubo, 0.1, 1);
 		break;
-
+	case 'e':
+		rotacionar(cubo, -0.1, 2);
+		break;
+	case 'q':
+		rotacionar(cubo, 0.1, 2);
+		break;
+	case 'g':
+		movimentar(cubo, -0.1, 0, 0);
+		break;
+	case 'j':
+		movimentar(cubo, 0.1, 0, 0);
+		break;
+	case 'n':
+		movimentar(cubo, 0, -0.1, 0);
+		break;
+	case 'h':
+		movimentar(cubo, 0, 0.1, 0);
+		break;
+	case 'b':
+		movimentar(cubo, 0, 0, -0.1);
+		break;
+	case 'm':
+		movimentar(cubo, 0, 0, +0.1);
+		break;
 	}
 }
 
@@ -212,17 +207,17 @@ Cubo criar_cubo(double posicao_x, double posicao_y, double posicao_z, double tam
 	return novo_cubo;
 }
 
-void movimentar(Cubo& poligono, double distancia) {
+void movimentar(Cubo& poligono, double distancia_x, double distancia_y, double distancia_z) {
 	std::cout << std::get<0>(poligono.posicao) << "\n";
 
-	std::get<0>(poligono.posicao) = std::get<0>(poligono.posicao) + distancia;
-	std::get<1>(poligono.posicao) = std::get<1>(poligono.posicao) + distancia;
-	std::get<2>(poligono.posicao) = std::get<2>(poligono.posicao) + distancia;
+	std::get<0>(poligono.posicao) = std::get<0>(poligono.posicao) + distancia_x;
+	std::get<1>(poligono.posicao) = std::get<1>(poligono.posicao) + distancia_y;
+	std::get<2>(poligono.posicao) = std::get<2>(poligono.posicao) + distancia_z;
 
 	for (int i = 0; i < 8; i++) {
-		std::get<0>(poligono.vertices[i]) = std::get<0>(poligono.vertices[i]) + distancia;
-		std::get<1>(poligono.vertices[i]) = std::get<1>(poligono.vertices[i]) + distancia;
-		std::get<2>(poligono.vertices[i]) = std::get<2>(poligono.vertices[i]) + distancia;
+		std::get<0>(poligono.vertices[i]) += distancia_x;
+		std::get<1>(poligono.vertices[i]) += distancia_y;
+		std::get<2>(poligono.vertices[i]) += distancia_z;
 	}
 
 	std::cout << std::get<0>(poligono.posicao) << "\n";
@@ -251,44 +246,44 @@ void escalar(Cubo& poligono, double escala) {
 }
 
 void rotacionar(Cubo& poligono, double angulo, int eixo) {
-    double novoX;
-    double novoY;
-    double novoZ;
+	double novoX;
+	double novoY;
+	double novoZ;
 
-    for (int i = 0; i < 8; i++) {
+	for (int i = 0; i < 8; i++) {
 		std::get<0>(poligono.vertices[i]) -= std::get<0>(poligono.posicao);
 		std::get<1>(poligono.vertices[i]) -= std::get<1>(poligono.posicao);
 		std::get<2>(poligono.vertices[i]) -= std::get<2>(poligono.posicao);
 
-        switch(eixo) {
-        case 0: // x
-            novoY = std::get<1>(poligono.vertices[i]) * cos(angulo) - std::get<2>(poligono.vertices[i]) * sin(angulo);
-            novoZ = std::get<1>(poligono.vertices[i]) * sin(angulo) + std::get<2>(poligono.vertices[i]) * cos(angulo);
+		switch (eixo) {
+		case 0: // x
+			novoY = std::get<1>(poligono.vertices[i]) * cos(angulo) - std::get<2>(poligono.vertices[i]) * sin(angulo);
+			novoZ = std::get<1>(poligono.vertices[i]) * sin(angulo) + std::get<2>(poligono.vertices[i]) * cos(angulo);
 
-            // std::get<0>(poligono.vertices[i]) = std::get<0>(poligono.vertices[i]);
-            std::get<1>(poligono.vertices[i]) = novoY;
-            std::get<2>(poligono.vertices[i]) = novoZ;
+			// std::get<0>(poligono.vertices[i]) = std::get<0>(poligono.vertices[i]);
+			std::get<1>(poligono.vertices[i]) = novoY;
+			std::get<2>(poligono.vertices[i]) = novoZ;
 
-            break;
-        case 1: // y
-            novoX = std::get<0>(poligono.vertices[i]) * cos(angulo) - std::get<2>(poligono.vertices[i]) * sin(angulo);
-            novoZ = std::get<0>(poligono.vertices[i]) * sin(angulo) + std::get<2>(poligono.vertices[i]) * cos(angulo);
+			break;
+		case 1: // y
+			novoX = std::get<0>(poligono.vertices[i]) * cos(angulo) - std::get<2>(poligono.vertices[i]) * sin(angulo);
+			novoZ = std::get<0>(poligono.vertices[i]) * sin(angulo) + std::get<2>(poligono.vertices[i]) * cos(angulo);
 
-            std::get<0>(poligono.vertices[i]) = novoX;
-            // std::get<1>(poligono.vertices[i]) = std::get<1>(poligono.vertices[i]);
-            std::get<2>(poligono.vertices[i]) = novoZ;
+			std::get<0>(poligono.vertices[i]) = novoX;
+			// std::get<1>(poligono.vertices[i]) = std::get<1>(poligono.vertices[i]);
+			std::get<2>(poligono.vertices[i]) = novoZ;
 
-            break;
-        case 2: // z
-            novoX = std::get<0>(poligono.vertices[i]) * cos(angulo) - std::get<1>(poligono.vertices[i]) * sin(angulo);
-            novoY = std::get<0>(poligono.vertices[i]) * sin(angulo) + std::get<1>(poligono.vertices[i]) * cos(angulo);
+			break;
+		case 2: // z
+			novoX = std::get<0>(poligono.vertices[i]) * cos(angulo) - std::get<1>(poligono.vertices[i]) * sin(angulo);
+			novoY = std::get<0>(poligono.vertices[i]) * sin(angulo) + std::get<1>(poligono.vertices[i]) * cos(angulo);
 
-            std::get<0>(poligono.vertices[i]) = novoX;
-            std::get<1>(poligono.vertices[i]) = novoY;
-            // std::get<2>(poligono.vertices[i]) = std::get<2>(poligono.vertices[i]);
+			std::get<0>(poligono.vertices[i]) = novoX;
+			std::get<1>(poligono.vertices[i]) = novoY;
+			// std::get<2>(poligono.vertices[i]) = std::get<2>(poligono.vertices[i]);
 
-            break;
-        }
+			break;
+		}
 
 		std::get<0>(poligono.vertices[i]) += std::get<0>(poligono.posicao);
 		std::get<1>(poligono.vertices[i]) += std::get<1>(poligono.posicao);
