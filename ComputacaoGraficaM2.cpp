@@ -67,13 +67,13 @@ void loadObj(string fname)
                 string x, y, z;
                 arquivo >> x >> y >> z;
 
-                int fp = stoi(x.substr(0, x.find("/"))) - 1;
+                int fp = stoi(x.substr(0, x.find("/")));
                 if (fp >= 0) fp = fp - 1; // o index negativo estará correto (-1 é de fato o último), enquanto que o index positivo, por começar em 1, tem que ser subtraido 1
 
-                int fs = stoi(y.substr(0, y.find("/"))) - 1;
+                int fs = stoi(y.substr(0, y.find("/")));
                 if (fs >= 0) fs = fs - 1;
 
-                int ft = stoi(z.substr(0, z.find("/"))) - 1;
+                int ft = stoi(z.substr(0, z.find("/")));
                 if (ft >= 0) ft = ft - 1;
 
                 face.push_back(fp);
@@ -198,7 +198,7 @@ int main(int argc, char** argv)
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);
     glutTimerFunc(10, timer, 0);
-    loadObj("data/radar.obj");
+    loadObj("data/elepham.obj");
     glutMainLoop();
     return 0;
 }
