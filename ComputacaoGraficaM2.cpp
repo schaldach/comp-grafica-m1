@@ -26,9 +26,10 @@ void loadObj(string fname)
     }
     else {
         string tipo;
+        vector<float> ultima_face;
         while (arquivo >> tipo)
         {
-            cout << "Tipo: " << tipo << "\n";
+            // cout << "Tipo: " << tipo << "\n";
             if (tipo == "v")
             {
                 vector<float> vertice;
@@ -40,7 +41,7 @@ void loadObj(string fname)
                 vertices.push_back(vertice);
             }
 
-            if (tipo == "vn")
+            else if (tipo == "vn")
             {
                 vector<float> normal;
                 float x, y, z;
@@ -51,7 +52,7 @@ void loadObj(string fname)
                 normals.push_back(normal);
             }
 
-            if (tipo == "vt")
+            else if (tipo == "vt")
             {
                 vector<float> texture;
                 float x, y;
@@ -61,17 +62,47 @@ void loadObj(string fname)
                 textures.push_back(texture);
             }
 
-            if (tipo == "f")
+            else if (tipo == "f")
             {
                 vector<int> face;
                 string x, y, z;
                 arquivo >> x >> y >> z;
+                cout << "x: " << x << "\n";
                 int fp = stoi(x.substr(0, x.find("/"))) - 1;
                 int fs = stoi(y.substr(0, y.find("/"))) - 1;
                 int ft = stoi(z.substr(0, z.find("/"))) - 1;
                 face.push_back(fp);
                 face.push_back(fs);
                 face.push_back(ft);
+
+                ultima_face.clear();
+
+                ultima_face.push_back(face[0]);
+                ultima_face.push_back(face[1]);
+                ultima_face.push_back(face[2]);
+
+                faces.push_back(face);
+            }
+
+            else if(tipo.find("/") != -1) { // o que seria o "tipo" veio um outro vértice, pois é uma face com mais de 3 vértices
+                // face com 4 vértices, criaremos o 2º triângulo
+                // se ele especifica um quadrilátero em qualquer ordem, é o 2º vértice que fica oposto ao último.
+                // então iremos fazer o triângulo com o 1º e 3º vértices
+                // e pensando nos casos com 5 vértices, que eu não havia percebido antes, esse comportamento se repete
+                vector<int> face;
+                cout << "tipo: " << tipo << "\n";
+                int f = stoi(tipo.substr(0, tipo.find("/"))) - 1;
+
+                face.push_back(ultima_face[0]);
+                face.push_back(ultima_face[2]);
+                face.push_back(f);
+
+                ultima_face.clear();
+
+                ultima_face.push_back(face[0]);
+                ultima_face.push_back(face[1]);
+                ultima_face.push_back(face[2]);
+
                 faces.push_back(face);
             }
         }
