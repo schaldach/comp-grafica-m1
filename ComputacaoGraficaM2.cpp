@@ -28,8 +28,7 @@ void loadObj(string fname)
         string tipo;
         vector<float> ultima_face;
         while (arquivo >> tipo)
-        {
-            // cout << "Tipo: " << tipo << "\n";
+        {            
             if (tipo == "v")
             {
                 vector<float> vertice;
@@ -69,8 +68,14 @@ void loadObj(string fname)
                 arquivo >> x >> y >> z;
 
                 int fp = stoi(x.substr(0, x.find("/"))) - 1;
+                if (fp >= 0) fp = fp - 1; // o index negativo estará correto (-1 é de fato o último), enquanto que o index positivo, por começar em 1, tem que ser subtraido 1
+
                 int fs = stoi(y.substr(0, y.find("/"))) - 1;
+                if (fs >= 0) fs = fs - 1;
+
                 int ft = stoi(z.substr(0, z.find("/"))) - 1;
+                if (ft >= 0) ft = ft - 1;
+
                 face.push_back(fp);
                 face.push_back(fs);
                 face.push_back(ft);
@@ -83,15 +88,17 @@ void loadObj(string fname)
 
                 faces.push_back(face);
             }
-
-            else if(tipo.find("/") != -1) { // o que seria o "tipo" veio um outro vértice, pois é uma face com mais de 3 vértices
+            // como detectar melhor quando continua a face? pois no radar existe uma linha com '/' que não é face
+            else if(tipo.find("/") != -1 && tipo.substr(tipo.find("/")+1, tipo.length()).find("/") != -1) { // ao menos 2 caracteres '/'
+                // o que seria o "tipo" veio um outro vértice, pois é uma face com mais de 3 vértices
                 // face com 4 vértices, criaremos o 2º triângulo
                 // se ele especifica um quadrilátero em qualquer ordem, é o 2º vértice que fica oposto ao último.
                 // então iremos fazer o triângulo com o 1º e 3º vértices
                 // e pensando nos casos com 5 vértices, que eu não havia percebido antes, esse comportamento se repete
                 vector<int> face;
                 // cout << "tipo: " << tipo << "\n";
-                int f = stoi(tipo.substr(0, tipo.find("/"))) - 1;
+                int f = stoi(tipo.substr(0, tipo.find("/")));
+                if(f >= 0) f = f - 1; // o index negativo estará correto (-1 é de fato o último), enquanto que o index positivo, por começar em 1, tem que ser subtraido 1
 
                 face.push_back(ultima_face[0]);
                 face.push_back(ultima_face[2]);
@@ -122,9 +129,18 @@ void loadObj(string fname)
         {
             vector<int> face = faces[i];
 
-            glVertex3f(vertices[face[0]][0], vertices[face[0]][1], vertices[face[0]][2]);
-            glVertex3f(vertices[face[1]][0], vertices[face[1]][1], vertices[face[1]][2]);
-            glVertex3f(vertices[face[2]][0], vertices[face[2]][1], vertices[face[2]][2]);
+            int v1_index = face[0];
+            if (v1_index < 0) v1_index = vertices.size() + v1_index;
+
+            int v2_index = face[1];
+            if (v2_index < 0) v2_index = vertices.size() + v2_index;
+
+            int v3_index = face[2];
+            if (v3_index < 0) v3_index = vertices.size() + v3_index;
+
+            glVertex3f(vertices[v1_index][0], vertices[v1_index][1], vertices[v1_index][2]);
+            glVertex3f(vertices[v2_index][0], vertices[v2_index][1], vertices[v2_index][2]);
+            glVertex3f(vertices[v3_index][0], vertices[v3_index][1], vertices[v3_index][2]);
 
         }
         glEnd();
@@ -182,7 +198,7 @@ int main(int argc, char** argv)
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);
     glutTimerFunc(10, timer, 0);
-    loadObj("data/porsche.obj");
+    loadObj("data/radar.obj");
     glutMainLoop();
     return 0;
 }
