@@ -9,6 +9,8 @@ using namespace std;
 
 unsigned int elefante;
 vector<vector<float>> vertices;
+vector<vector<float>> normals;
+vector<vector<float>> textures;
 vector<vector<int>> faces;
 float rot_ele;
 
@@ -26,7 +28,7 @@ void loadObj(string fname)
         string tipo;
         while (arquivo >> tipo)
         {
-
+            cout << "Tipo: " << tipo << "\n";
             if (tipo == "v")
             {
                 vector<float> vertice;
@@ -36,6 +38,27 @@ void loadObj(string fname)
                 vertice.push_back(y);
                 vertice.push_back(z);
                 vertices.push_back(vertice);
+            }
+
+            if (tipo == "vn")
+            {
+                vector<float> normal;
+                float x, y, z;
+                arquivo >> x >> y >> z;
+                normal.push_back(x);
+                normal.push_back(y);
+                normal.push_back(z);
+                normals.push_back(normal);
+            }
+
+            if (tipo == "vt")
+            {
+                vector<float> texture;
+                float x, y;
+                arquivo >> x >> y;
+                texture.push_back(x);
+                texture.push_back(y);
+                textures.push_back(texture);
             }
 
             if (tipo == "f")
