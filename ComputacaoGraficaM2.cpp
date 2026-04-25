@@ -67,7 +67,7 @@ void loadObj(string fname)
                 vector<int> face;
                 string x, y, z;
                 arquivo >> x >> y >> z;
-                cout << "x: " << x << "\n";
+
                 int fp = stoi(x.substr(0, x.find("/"))) - 1;
                 int fs = stoi(y.substr(0, y.find("/"))) - 1;
                 int ft = stoi(z.substr(0, z.find("/"))) - 1;
@@ -90,7 +90,7 @@ void loadObj(string fname)
                 // então iremos fazer o triângulo com o 1º e 3º vértices
                 // e pensando nos casos com 5 vértices, que eu não havia percebido antes, esse comportamento se repete
                 vector<int> face;
-                cout << "tipo: " << tipo << "\n";
+                // cout << "tipo: " << tipo << "\n";
                 int f = stoi(tipo.substr(0, tipo.find("/"))) - 1;
 
                 face.push_back(ultima_face[0]);
