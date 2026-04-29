@@ -12,8 +12,8 @@ vector<vector<float>> vertices;
 vector<vector<float>> normals;
 vector<vector<float>> textures;
 vector<vector<int>> faces;
-float rot_ele;
 
+void keyboard(unsigned char key, int x, int y);
 
 void loadObj(string fname)
 {
@@ -162,24 +162,36 @@ void reshape(int w, int h)
 
     glMatrixMode(GL_MODELVIEW);
 }
-void drawElephant()
+
+float rotation_x = 0;
+float rotation_y = 0;
+float rotation_z = 0;
+
+void drawElephant(float rotation)
 {
     glPushMatrix();
-    glTranslatef(0, -40.00, -105);
     glColor3f(1.0, 0.23, 0.27);
+
+    // translação (x,y,z)
+    glTranslatef(0, -40.00, -105);
+
+    // escala (mesmo número para todos)
     glScalef(0.4, 0.4, 0.4);
-    glRotatef(rot_ele, 0, 1, 0);
+
+    // rotação (x,y,z)
+    glRotatef(rotation_x, 1, 0, 0);
+    glRotatef(rotation_y, 0, 1, 0);
+    glRotatef(rotation_z, 0, 0, 1);
+
     glCallList(elefante);
     glPopMatrix();
-    rot_ele = rot_ele + 0.6;
-    if (rot_ele > 360) rot_ele = rot_ele - 360;
 }
 void display(void)
 {
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    drawElephant();
+    drawElephant(0);
     glutSwapBuffers();
 }
 
@@ -197,8 +209,24 @@ int main(int argc, char** argv)
     glutCreateWindow("Carregar OBJ");
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);
+    glutKeyboardFunc(keyboard);
     glutTimerFunc(10, timer, 0);
-    loadObj("data/elepham.obj");
+    loadObj("data/porsche.obj");
     glutMainLoop();
     return 0;
+}
+
+void keyboard(unsigned char key, int x, int y) {
+    std::cout << key;
+    switch (key) {
+    case 27:
+        exit(0);
+        break;
+    case 'o':
+        rotation_x += 2;
+        break;
+    case 'p':
+        rotation_x -= 2;
+        break;
+    }
 }
