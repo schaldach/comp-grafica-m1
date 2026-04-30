@@ -181,33 +181,18 @@ void loadObj(string fname)
         {
             Face face = faces[i];
 
-            int v1_index = face.vertices[0];
-            if (v1_index < 0) v1_index = vertices.size() + v1_index;
-
-            int v2_index = face.vertices[1];
-            if (v2_index < 0) v2_index = vertices.size() + v2_index;
-
-            int v3_index = face.vertices[2];
-            if (v3_index < 0) v3_index = vertices.size() + v3_index;
-
-            glVertex3f(vertices[v1_index][0], vertices[v1_index][1], vertices[v1_index][2]);
-            glVertex3f(vertices[v2_index][0], vertices[v2_index][1], vertices[v2_index][2]);
-            glVertex3f(vertices[v3_index][0], vertices[v3_index][1], vertices[v3_index][2]);
-
-            if (!face.normals.empty())
+            for (int j = 0; j < 3; j++)
             {
-                int n1_index = face.normals[0];
-                if (n1_index < 0) n1_index = normals.size() + n1_index;
+                if (!face.normals.empty())
+                {
+                    int n_index = face.normals[j];
+                    if (n_index < 0) n_index = normals.size() + n_index;
+                    glNormal3f(normals[n_index][0], normals[n_index][1], normals[n_index][2]);
+                }
 
-                int n2_index = face.normals[1];
-                if (n2_index < 0) n2_index = normals.size() + n2_index;
-
-                int n3_index = face.normals[2];
-                if (n3_index < 0) n3_index = normals.size() + n3_index;
-
-                glNormal3f(normals[n1_index][0], normals[n1_index][1], normals[n1_index][2]);
-                glNormal3f(normals[n2_index][0], normals[n2_index][1], normals[n2_index][2]);
-                glNormal3f(normals[n3_index][0], normals[n3_index][1], normals[n3_index][2]);
+                int v_index = face.vertices[j];
+                if (v_index < 0) v_index = vertices.size() + v_index;
+                glVertex3f(vertices[v_index][0], vertices[v_index][1], vertices[v_index][2]);
             }
         }
         glEnd();
@@ -264,19 +249,19 @@ vector<Luz> luzes = {
         GL_LIGHT0,
         { 500.0, 500.0, 0.0, 1.0 },
         { 0.2, 0.15, 0.1, 1.0 },
-        { 0.8, 0.7, 0.6, 1.0 },
+        { 0.8, 0.6, 0.4, 1.0 },
         { 1.0, 1.0, 1.0, 1.0 },
         true
     }, {
         GL_LIGHT1,
         { -500.0, -500.0, 0.0, 1.0 },
         { 0.1, 0.2, 0.1, 1.0 },
-        { 0.7, 0.8, 0.7, 1.0 },
+        { 0.6, 0.8, 0.6, 1.0 },
         { 1.0, 1.0, 1.0, 1.0 },
         true
     }, {
         GL_LIGHT2,
-        { 0.0, 0.0, 1000.0, 1.0 },
+        { 0.0, 1000.0, 0.0, 1.0 },
         { 0.1, 0.15, 0.2, 1.0 },
         { 0.4, 0.6, 0.8, 1.0 },
         { 1.0, 1.0, 1.0, 1.0 },
@@ -378,6 +363,8 @@ void initGL()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
+    glEnable(GL_NORMALIZE);
+
 	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 	glEnable(GL_LIGHTING);
 
@@ -403,7 +390,7 @@ int main(int argc, char** argv)
     glutKeyboardFunc(keyboard);
     glutTimerFunc(10, timer, 0);
     initGL();
-    loadObj("data/porsche.obj");
+    loadObj("data/elepham.obj");
     glutMainLoop();
     return 0;
 }
