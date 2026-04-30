@@ -1,17 +1,32 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
+#include <array>
 #include <GL/freeglut.h>
 #include <string>
 using namespace std;
 
 //globals
 
+struct Face {
+    vector<float> vertices;
+    vector<float> normals;
+    vector<float> textures;
+};
+
+struct Luz {
+    int id;
+    std::array<GLfloat, 4> posicao;
+    bool ativada;
+};
+
 unsigned int elefante;
 vector<vector<float>> vertices;
 vector<vector<float>> normals;
 vector<vector<float>> textures;
-vector<vector<int>> faces;
+vector<Face> faces;
+vector<int> luzes;
 
 void keyboard(unsigned char key, int x, int y);
 
@@ -26,7 +41,9 @@ void loadObj(string fname)
     }
     else {
         string tipo;
-        vector<float> ultima_face;
+        string face_vertice;
+        string v_str, vt_str, vn_str;
+        Face ultima_face;
         while (arquivo >> tipo)
         {
             if (tipo == "v")
@@ -63,28 +80,39 @@ void loadObj(string fname)
 
             else if (tipo == "f")
             {
-                vector<int> face;
-                string x, y, z;
-                arquivo >> x >> y >> z;
+                Face face;
 
-                int fp = stoi(x.substr(0, x.find("/")));
-                if (fp >= 0) fp = fp - 1; // o index negativo estará correto (-1 é de fato o último), enquanto que o index positivo, por começar em 1, tem que ser subtraido 1
+                for (int i = 0; i < 3; i++)
+                {
+                    arquivo >> face_vertice;
+                    istringstream vss(face_vertice);
 
-                int fs = stoi(y.substr(0, y.find("/")));
-                if (fs >= 0) fs = fs - 1;
+                    // vértice
+                    getline(vss, v_str, '/');
+                    int v = stoi(v_str);
+                    if (v >= 0) v--; // o index negativo estará correto (-1 é de fato o último), enquanto que o index positivo, por começar em 1, tem que ser subtraido 1
+                    face.vertices.push_back(v);
 
-                int ft = stoi(z.substr(0, z.find("/")));
-                if (ft >= 0) ft = ft - 1;
+                    // textura
+                    if (getline(vss, vt_str, '/') && !vt_str.empty())
+                    {
+                        int vt = stoi(vt_str);
+                        if (vt >= 0) vt--;
+                        face.textures.push_back(vt);
+                    }
 
-                face.push_back(fp);
-                face.push_back(fs);
-                face.push_back(ft);
+                    // normal
+                    if (getline(vss, vn_str, '/') && !vn_str.empty())
+                    {
+                        int vn = stoi(vn_str);
+                        if (vn >= 0) vn--;
+                        face.normals.push_back(vn);
+                    }
+                }
 
-                ultima_face.clear();
-
-                ultima_face.push_back(face[0]);
-                ultima_face.push_back(face[1]);
-                ultima_face.push_back(face[2]);
+                ultima_face.vertices = face.vertices;
+                ultima_face.textures = face.textures;
+                ultima_face.normals = face.normals;
 
                 faces.push_back(face);
             }
@@ -95,28 +123,50 @@ void loadObj(string fname)
                 // se ele especifica um quadrilátero em qualquer ordem, é o 2º vértice que fica oposto ao último.
                 // então iremos fazer o triângulo com o 1º e 3º vértices
                 // e pensando nos casos com 5 vértices, que eu não havia percebido antes, esse comportamento se repete
-                vector<int> face;
+                Face face;
+
+                face.vertices.push_back(ultima_face.vertices[0]);
+                face.vertices.push_back(ultima_face.vertices[2]);
+
+                face.textures.push_back(ultima_face.textures[0]);
+                face.textures.push_back(ultima_face.textures[2]);
+
+                face.normals.push_back(ultima_face.normals[0]);
+                face.normals.push_back(ultima_face.normals[2]);
+
                 // cout << "tipo: " << tipo << "\n";
-                int f = stoi(tipo.substr(0, tipo.find("/")));
-                if (f >= 0) f = f - 1; // o index negativo estará correto (-1 é de fato o último), enquanto que o index positivo, por começar em 1, tem que ser subtraido 1
+                istringstream vss(tipo);
 
-                face.push_back(ultima_face[0]);
-                face.push_back(ultima_face[2]);
-                face.push_back(f);
+                // vértice
+                getline(vss, v_str, '/');
+                int v = stoi(v_str);
+                if (v >= 0) v--;
+                face.vertices.push_back(v);
 
-                ultima_face.clear();
+                // textura
+                if (getline(vss, vt_str, '/') && !vt_str.empty())
+                {
+                    int vt = stoi(vt_str);
+                    if (vt >= 0) vt--;
+                    face.textures.push_back(vt);
+                }
 
-                ultima_face.push_back(face[0]);
-                ultima_face.push_back(face[1]);
-                ultima_face.push_back(face[2]);
+                // normal
+                if (getline(vss, vn_str, '/') && !vn_str.empty())
+                {
+                    int vn = stoi(vn_str);
+                    if (vn >= 0) vn--;
+                    face.normals.push_back(vn);
+                }
+
+                ultima_face.vertices = face.vertices;
+                ultima_face.textures = face.textures;
+                ultima_face.normals = face.normals;
 
                 faces.push_back(face);
             }
         }
     }
-
-
-
 
     elefante = glGenLists(1);
     glPointSize(2.0);
@@ -127,21 +177,36 @@ void loadObj(string fname)
 
         for (int i = 0; i < faces.size(); i++)
         {
-            vector<int> face = faces[i];
+            Face face = faces[i];
 
-            int v1_index = face[0];
+            int v1_index = face.vertices[0];
             if (v1_index < 0) v1_index = vertices.size() + v1_index;
 
-            int v2_index = face[1];
+            int v2_index = face.vertices[1];
             if (v2_index < 0) v2_index = vertices.size() + v2_index;
 
-            int v3_index = face[2];
+            int v3_index = face.vertices[2];
             if (v3_index < 0) v3_index = vertices.size() + v3_index;
 
             glVertex3f(vertices[v1_index][0], vertices[v1_index][1], vertices[v1_index][2]);
             glVertex3f(vertices[v2_index][0], vertices[v2_index][1], vertices[v2_index][2]);
             glVertex3f(vertices[v3_index][0], vertices[v3_index][1], vertices[v3_index][2]);
 
+            if (!face.normals.empty())
+            {
+                int n1_index = face.normals[0];
+                if (n1_index < 0) n1_index = normals.size() + n1_index;
+
+                int n2_index = face.normals[1];
+                if (n2_index < 0) n2_index = normals.size() + n2_index;
+
+                int n3_index = face.normals[2];
+                if (n3_index < 0) n3_index = normals.size() + n3_index;
+
+                glNormal3f(normals[n1_index][0], normals[n1_index][1], normals[n1_index][2]);
+                glNormal3f(normals[n2_index][0], normals[n2_index][1], normals[n2_index][2]);
+                glNormal3f(normals[n3_index][0], normals[n3_index][1], normals[n3_index][2]);
+            }
         }
         glEnd();
 
@@ -152,6 +217,35 @@ void loadObj(string fname)
 
 }
 
+void setupLighting()
+{
+    const vector<Luz> luzes = {
+        { GL_LIGHT0, { 500.0, 500.0, 0.0, 1.0 }, true },
+        { GL_LIGHT1, { -500.0, -500.0, 0.0, 1.0 }, false },
+        { GL_LIGHT2, { 0.0, 0.0, 1000.0, 1.0 }, false },
+    };
+
+    const vector<GLfloat> luz_ambiente = { 0.2, 0.2, 0.2, 1.0 };
+	const vector<GLfloat> luz_difusa = { 0.8, 0.8, 0.8, 1.0 };
+	const vector<GLfloat> luz_especular = { 1.0, 1.0, 1.0, 1.0 };
+
+	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
+	glEnable(GL_LIGHTING);
+
+    for (const auto& luz : luzes)
+    {
+        if (luz.ativada)
+        {
+            glEnable(luz.id);
+
+            glLightfv(luz.id, GL_AMBIENT, luz_ambiente.data());
+            glLightfv(luz.id, GL_DIFFUSE, luz_difusa.data());
+            glLightfv(luz.id, GL_SPECULAR, luz_especular.data());
+
+            glLightfv(luz.id, GL_POSITION, luz.posicao.data());
+        }
+    }
+}
 
 void reshape(int w, int h)
 {
@@ -192,6 +286,7 @@ void drawElephant(float rotation)
     glCallList(elefante);
     glPopMatrix();
 }
+
 void display(void)
 {
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -201,28 +296,8 @@ void display(void)
     glutSwapBuffers();
 }
 
-void timer(int value) {
-    glutPostRedisplay();
-    glutTimerFunc(10, timer, 0);
-}
-
-int main(int argc, char** argv)
+void keyboard(unsigned char key, int x, int y)
 {
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(800, 450);
-    glutInitWindowPosition(20, 20);
-    glutCreateWindow("Carregar OBJ");
-    glutReshapeFunc(reshape);
-    glutDisplayFunc(display);
-    glutKeyboardFunc(keyboard);
-    glutTimerFunc(10, timer, 0);
-    loadObj("data/porsche.obj");
-    glutMainLoop();
-    return 0;
-}
-
-void keyboard(unsigned char key, int x, int y) {
     std::cout << key;
     switch (key) {
     case 27:
@@ -271,4 +346,36 @@ void keyboard(unsigned char key, int x, int y) {
         movimentacao_z += 2;
         break;
     }
+}
+
+void timer(int value)
+{
+    glutPostRedisplay();
+    glutTimerFunc(10, timer, 0);
+}
+
+void initGL()
+{
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearDepth(1.0);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+}
+
+int main(int argc, char** argv)
+{
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(800, 450);
+    glutInitWindowPosition(20, 20);
+    glutCreateWindow("Carregar OBJ");
+    glutReshapeFunc(reshape);
+    glutDisplayFunc(display);
+    glutKeyboardFunc(keyboard);
+    glutTimerFunc(10, timer, 0);
+    initGL();
+    loadObj("data/porsche.obj");
+    setupLighting();
+    glutMainLoop();
+    return 0;
 }
