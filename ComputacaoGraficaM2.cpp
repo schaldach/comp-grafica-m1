@@ -18,6 +18,9 @@ struct Face {
 struct Luz {
     int id;
     std::array<GLfloat, 4> posicao;
+    std::array<GLfloat, 4> ambiente;
+    std::array<GLfloat, 4> difusa;
+    std::array<GLfloat, 4> especular;
     bool ativada;
 };
 
@@ -26,7 +29,6 @@ vector<vector<float>> vertices;
 vector<vector<float>> normals;
 vector<vector<float>> textures;
 vector<Face> faces;
-vector<int> luzes;
 
 void keyboard(unsigned char key, int x, int y);
 
@@ -217,36 +219,6 @@ void loadObj(string fname)
 
 }
 
-void setupLighting()
-{
-    const vector<Luz> luzes = {
-        { GL_LIGHT0, { 500.0, 500.0, 0.0, 1.0 }, true },
-        { GL_LIGHT1, { -500.0, -500.0, 0.0, 1.0 }, false },
-        { GL_LIGHT2, { 0.0, 0.0, 1000.0, 1.0 }, false },
-    };
-
-    const vector<GLfloat> luz_ambiente = { 0.2, 0.2, 0.2, 1.0 };
-	const vector<GLfloat> luz_difusa = { 0.8, 0.8, 0.8, 1.0 };
-	const vector<GLfloat> luz_especular = { 1.0, 1.0, 1.0, 1.0 };
-
-	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
-	glEnable(GL_LIGHTING);
-
-    for (const auto& luz : luzes)
-    {
-        if (luz.ativada)
-        {
-            glEnable(luz.id);
-
-            glLightfv(luz.id, GL_AMBIENT, luz_ambiente.data());
-            glLightfv(luz.id, GL_DIFFUSE, luz_difusa.data());
-            glLightfv(luz.id, GL_SPECULAR, luz_especular.data());
-
-            glLightfv(luz.id, GL_POSITION, luz.posicao.data());
-        }
-    }
-}
-
 void reshape(int w, int h)
 {
     glViewport(0, 0, w, h);
@@ -287,12 +259,49 @@ void drawElephant(float rotation)
     glPopMatrix();
 }
 
+vector<Luz> luzes = {
+    {
+        GL_LIGHT0,
+        { 500.0, 500.0, 0.0, 1.0 },
+        { 0.2, 0.15, 0.1, 1.0 },
+        { 0.8, 0.7, 0.6, 1.0 },
+        { 1.0, 1.0, 1.0, 1.0 },
+        true
+    }, {
+        GL_LIGHT1,
+        { -500.0, -500.0, 0.0, 1.0 },
+        { 0.1, 0.2, 0.1, 1.0 },
+        { 0.7, 0.8, 0.7, 1.0 },
+        { 1.0, 1.0, 1.0, 1.0 },
+        true
+    }, {
+        GL_LIGHT2,
+        { 0.0, 0.0, 1000.0, 1.0 },
+        { 0.1, 0.15, 0.2, 1.0 },
+        { 0.4, 0.6, 0.8, 1.0 },
+        { 1.0, 1.0, 1.0, 1.0 },
+        true
+    }
+};
+
+void setupLighting()
+{
+    for (const auto& luz : luzes)
+    {
+        if (luz.ativada)
+            glEnable(luz.id);
+        else
+            glDisable(luz.id);
+    }
+}
+
 void display(void)
 {
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     drawElephant(0);
+    setupLighting();
     glutSwapBuffers();
 }
 
@@ -345,6 +354,15 @@ void keyboard(unsigned char key, int x, int y)
     case 'm':
         movimentacao_z += 2;
         break;
+    case '1':
+        luzes[0].ativada = !luzes[0].ativada;
+        break;
+    case '2':
+        luzes[1].ativada = !luzes[1].ativada;
+        break;
+    case '3':
+        luzes[2].ativada = !luzes[2].ativada;
+        break;
     }
 }
 
@@ -356,10 +374,21 @@ void timer(int value)
 
 void initGL()
 {
-    glClearColor(0.0, 0.0, 0.0, 1.0);
     glClearDepth(1.0);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+
+	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
+	glEnable(GL_LIGHTING);
+
+    for (const auto& luz : luzes)
+    {
+        glLightfv(luz.id, GL_POSITION, luz.posicao.data());
+
+        glLightfv(luz.id, GL_AMBIENT, luz.ambiente.data());
+        glLightfv(luz.id, GL_DIFFUSE, luz.difusa.data());
+        glLightfv(luz.id, GL_SPECULAR, luz.especular.data());
+    }
 }
 
 int main(int argc, char** argv)
@@ -375,7 +404,6 @@ int main(int argc, char** argv)
     glutTimerFunc(10, timer, 0);
     initGL();
     loadObj("data/porsche.obj");
-    setupLighting();
     glutMainLoop();
     return 0;
 }
