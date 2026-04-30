@@ -28,7 +28,7 @@ void loadObj(string fname)
         string tipo;
         vector<float> ultima_face;
         while (arquivo >> tipo)
-        {            
+        {
             if (tipo == "v")
             {
                 vector<float> vertice;
@@ -89,7 +89,7 @@ void loadObj(string fname)
                 faces.push_back(face);
             }
             // como detectar melhor quando continua a face? pois no radar existe uma linha com '/' que não é face
-            else if(tipo.find("/") != -1 && tipo.substr(tipo.find("/")+1, tipo.length()).find("/") != -1) { // ao menos 2 caracteres '/'
+            else if (tipo.find("/") != -1 && tipo.substr(tipo.find("/") + 1, tipo.length()).find("/") != -1) { // ao menos 2 caracteres '/'
                 // o que seria o "tipo" veio um outro vértice, pois é uma face com mais de 3 vértices
                 // face com 4 vértices, criaremos o 2º triângulo
                 // se ele especifica um quadrilátero em qualquer ordem, é o 2º vértice que fica oposto ao último.
@@ -98,7 +98,7 @@ void loadObj(string fname)
                 vector<int> face;
                 // cout << "tipo: " << tipo << "\n";
                 int f = stoi(tipo.substr(0, tipo.find("/")));
-                if(f >= 0) f = f - 1; // o index negativo estará correto (-1 é de fato o último), enquanto que o index positivo, por começar em 1, tem que ser subtraido 1
+                if (f >= 0) f = f - 1; // o index negativo estará correto (-1 é de fato o último), enquanto que o index positivo, por começar em 1, tem que ser subtraido 1
 
                 face.push_back(ultima_face[0]);
                 face.push_back(ultima_face[2]);
@@ -167,16 +167,22 @@ float rotation_x = 0;
 float rotation_y = 0;
 float rotation_z = 0;
 
+float movimentacao_x = 0;
+float movimentacao_y = -40;
+float movimentacao_z = -105;
+
+float escala = 0.4;
+
 void drawElephant(float rotation)
 {
     glPushMatrix();
     glColor3f(1.0, 0.23, 0.27);
 
     // translação (x,y,z)
-    glTranslatef(0, -40.00, -105);
+    glTranslatef(movimentacao_x, movimentacao_y, movimentacao_z);
 
     // escala (mesmo número para todos)
-    glScalef(0.4, 0.4, 0.4);
+    glScalef(escala, escala, escala);
 
     // rotação (x,y,z)
     glRotatef(rotation_x, 1, 0, 0);
@@ -223,10 +229,46 @@ void keyboard(unsigned char key, int x, int y) {
         exit(0);
         break;
     case 'o':
-        rotation_x += 2;
+        escala = escala * 0.9;
         break;
     case 'p':
-        rotation_x -= 2;
+        escala = escala * 1.1;
+        break;
+    case 'w':
+		rotation_x -= 2;
+        break;
+    case 's':
+        rotation_x += 2;
+        break;
+    case 'd':
+        rotation_y -= 2;
+        break;
+    case 'a':
+        rotation_y += 2;
+        break;
+    case 'e':
+        rotation_z -= 2;
+        break;
+    case 'q':
+        rotation_z += 2;
+        break;
+    case 'g':
+        movimentacao_x -= 2;
+        break;
+    case 'j':
+        movimentacao_x += 2;
+        break;
+    case 'n':
+        movimentacao_y -= 2;
+        break;
+    case 'h':
+        movimentacao_y += 2;
+        break;
+    case 'b':
+        movimentacao_z -= 2;
+        break;
+    case 'm':
+        movimentacao_z += 2;
         break;
     }
 }
