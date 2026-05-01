@@ -10,9 +10,9 @@ using namespace std;
 //globals
 
 struct Face {
-    vector<float> vertices;
-    vector<float> normals;
-    vector<float> textures;
+    vector<int> vertices;
+    vector<int> normals;
+    vector<int> textures;
 };
 
 struct Luz {
@@ -45,7 +45,7 @@ void loadObj(string fname)
         string tipo;
         string face_vertice;
         string v_str, vt_str, vn_str;
-        Face ultima_face;
+        Face* ultima_face;
         while (arquivo >> tipo)
         {
             if (tipo == "v")
@@ -104,7 +104,7 @@ void loadObj(string fname)
                     }
 
                     // normal
-                    if (getline(vss, vn_str, '/') && !vn_str.empty())
+                    if (getline(vss, vn_str) && !vn_str.empty())
                     {
                         int vn = stoi(vn_str);
                         if (vn >= 0) vn--;
@@ -112,11 +112,8 @@ void loadObj(string fname)
                     }
                 }
 
-                ultima_face.vertices = face.vertices;
-                ultima_face.textures = face.textures;
-                ultima_face.normals = face.normals;
-
                 faces.push_back(face);
+                ultima_face = &faces.back();
             }
             // como detectar melhor quando continua a face? pois no radar existe uma linha com '/' que não é face
             else if (tipo.find("/") != -1 && tipo.substr(tipo.find("/") + 1, tipo.length()).find("/") != -1) { // ao menos 2 caracteres '/'
@@ -125,47 +122,47 @@ void loadObj(string fname)
                 // se ele especifica um quadrilátero em qualquer ordem, é o 2º vértice que fica oposto ao último.
                 // então iremos fazer o triângulo com o 1º e 3º vértices
                 // e pensando nos casos com 5 vértices, que eu não havia percebido antes, esse comportamento se repete
-                Face face;
-
-                face.vertices.push_back(ultima_face.vertices[0]);
-                face.vertices.push_back(ultima_face.vertices[2]);
-
-                face.textures.push_back(ultima_face.textures[0]);
-                face.textures.push_back(ultima_face.textures[2]);
-
-                face.normals.push_back(ultima_face.normals[0]);
-                face.normals.push_back(ultima_face.normals[2]);
+                Face face2;
 
                 // cout << "tipo: " << tipo << "\n";
                 istringstream vss(tipo);
 
-                // vértice
+                face2.vertices.push_back(ultima_face->vertices[0]);
+                face2.vertices.push_back(ultima_face->vertices[2]);
+
                 getline(vss, v_str, '/');
                 int v = stoi(v_str);
                 if (v >= 0) v--;
-                face.vertices.push_back(v);
+                face2.vertices.push_back(v);
 
-                // textura
-                if (getline(vss, vt_str, '/') && !vt_str.empty())
+                if (!ultima_face->textures.empty())
                 {
-                    int vt = stoi(vt_str);
-                    if (vt >= 0) vt--;
-                    face.textures.push_back(vt);
+                    face2.textures.push_back(ultima_face->textures[0]);
+                    face2.textures.push_back(ultima_face->textures[2]);
+
+                    if (getline(vss, vt_str, '/') && !vt_str.empty())
+                    {
+                        int vt = stoi(vt_str);
+                        if (vt >= 0) vt--;
+                        face2.textures.push_back(vt);
+                    }
                 }
 
-                // normal
-                if (getline(vss, vn_str, '/') && !vn_str.empty())
+                /* if (!ultima_face->normals.empty())
                 {
-                    int vn = stoi(vn_str);
-                    if (vn >= 0) vn--;
-                    face.normals.push_back(vn);
-                }
+                    face2.normals.push_back(ultima_face->normals[0]);
+                    face2.normals.push_back(ultima_face->normals[2]);
 
-                ultima_face.vertices = face.vertices;
-                ultima_face.textures = face.textures;
-                ultima_face.normals = face.normals;
+                    if (getline(vss, vn_str) && !vn_str.empty())
+                    {
+                        int vn = stoi(vn_str);
+                        if (vn >= 0) vn--;
+                        face2.normals.push_back(vn);
+                    }
+                } */
 
-                faces.push_back(face);
+                faces.push_back(face2);
+                ultima_face = &faces.back();
             }
         }
     }
